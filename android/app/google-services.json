@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "289295335978",
+    "project_id": "flutter-arizal",
+    "storage_bucket": "flutter-arizal.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:289295335978:android:2f2db6909230a740fa7953",
+        "android_client_info": {
+          "package_name": "com.example.dashboard_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "289295335978-etuhepsu1f20n4ljkcf88pdslhc5uqsk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.dashboard_app",
+            "certificate_hash": "05664888ab9681bd9b6f5fe654b6e1797c8f22e4"
+          }
+        },
+        {
+          "client_id": "289295335978-h90jep9bar5rl74fp8488q50vir26teu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBnKwDQr0MYn-EXER4OlNCCLl6mgCIVp34"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "289295335978-h90jep9bar5rl74fp8488q50vir26teu.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "289295335978-t5g4pbk13oge83vn8dajg5mrhpquus2m.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.dashboardApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

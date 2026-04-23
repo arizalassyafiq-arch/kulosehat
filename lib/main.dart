@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
-import 'providers/auth_provider.dart';
-import 'screens/explore_screen.dart';
-import 'screens/history_screen.dart';
-import 'screens/profile_screen.dart';
-import 'firebase_options.dart';
+import 'tubes/providers/auth_provider.dart';
+import 'tubes/screens/explore_screen.dart';
+import 'tubes/screens/history_screen.dart';
+import 'tubes/screens/profile_screen.dart';
+import 'tubes/firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

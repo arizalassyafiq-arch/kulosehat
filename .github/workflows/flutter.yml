@@ -1,4 +1,4 @@
-name: Flutter CI
+name: Flutter CI/CD
 
 on:
   push:
@@ -22,8 +22,8 @@ jobs:
       - name: 📦 Install Dependencies
         run: flutter pub get
 
-      - name: 🧪 Run Tests
-        run: echo "Skip tests for CI"
+      - name: 🧪 Skip Tests
+        run: echo "Skip tests"
 
       - name: 🏗️ Build APK
         run: flutter build apk --release
@@ -31,12 +31,12 @@ jobs:
       - name: 📤 Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-        name: app-release
-        path: build/app/outputs/flutter-apk/app-release.apk
+          name: app-release
+          path: build/app/outputs/flutter-apk/app-release.apk
 
       - name: 🚀 Create Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-        name: "Release ${{ github.ref_name }}"
-        files: build/app/outputs/flutter-apk/app-release.apk
+          name: "Release ${{ github.ref_name }}"
+          files: build/app/outputs/flutter-apk/app-release.apk

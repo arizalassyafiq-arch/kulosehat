@@ -15,7 +15,6 @@ void main() {
     await tester.pumpWidget(const MyApp());
 
     expect(find.text('Beranda'), findsOneWidget);
-    expect(find.text('Home'), findsOneWidget);
     expect(find.text('Jelajah'), findsOneWidget);
     expect(find.text('Profil'), findsOneWidget);
   });

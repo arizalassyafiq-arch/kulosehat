@@ -14,54 +14,79 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout
       - name: 📥 Checkout Repository
         uses: actions/checkout@v4
 
+      # 2. Setup Flutter
       - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.41.7'
+          flutter-version: '3.19.0'
 
+      # 3. Install Dependencies
       - name: 📦 Install Dependencies
         run: flutter pub get
 
+      # 4. (Optional) Test
       - name: 🧪 Skip Tests
         run: echo "Skip tests"
 
+      # 5. Build APK
       - name: 🏗️ Build APK
         run: flutter build apk --release
 
+      # 6. Debug (biar yakin file ada)
+      - name: 🔍 Check APK File
+        run: ls -R build/app/outputs/flutter-apk/
+
+      # 7. Upload Artifact
       - name: 📤 Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release
           path: build/app/outputs/flutter-apk/app-release.apk
 
+      # 8. Create GitHub Release (hanya saat tag)
       - name: 🚀 Create Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           name: "Release ${{ github.ref_name }}"
           files: build/app/outputs/flutter-apk/app-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # 9. Notify Success
       - name: 📢 Notify Telegram (Success)
         if: success()
         run: |
           curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
           -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-          -d text="✅ Build APK berhasil untuk commit ${{ github.sha }}"
+          -d text="✅ Build APK berhasil!
+Commit: ${{ github.sha }}"
 
-      - name: ❌ Notify Telegram (Failed)
-        if: failure()
-        run: |q
-          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
-          -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-          -d text="❌ Build gagal di GitHub Actions"
-          
+      # 10. Send APK ke Telegram
       - name: 📤 Send APK to Telegram
         if: success()
         run: |
-          curl -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument \
-          -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-          -F document=@build/app/outputs/flutter-apk/app-release.apk \
-          -F caption="📦 APK terbaru berhasil di-build 🚀"
+          FILE="build/app/outputs/flutter-apk/app-release.apk"
+
+          if [ -f "$FILE" ]; then
+            curl -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument \
+              -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+              -F document=@$FILE \
+              -F caption="📦 APK terbaru 🚀
+Commit: ${{ github.sha }}"
+          else
+            echo "APK file not found!"
+            exit 1
+          fi
+
+      # 11. Notify Failed
+      - name: ❌ Notify Telegram (Failed)
+        if: failure()
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+          -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+          -d text="❌ Build gagal di GitHub Actions"

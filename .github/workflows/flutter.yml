@@ -1,61 +1,64 @@
-name: Flutter CI/CD
+name: Flutter CI/CD Advanced
 
 on:
   push:
     branches: [ main ]
-    tags:
-      - 'v*'
-
-permissions:
-  contents: write
+  pull_request:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        flutter: [3.41.8]  # sesuaikan dengan project kamu
+
     steps:
-      - name: 📥 Checkout Repository
+      # 1. Checkout
+      - name: 📥 Checkout
         uses: actions/checkout@v4
 
+      # 2. Setup Flutter (dynamic dari matrix)
       - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.41.8'
+          flutter-version: ${{ matrix.flutter }}
 
+      # 3. Cache Dependencies (lebih optimal)
+      - name: ⚡ Cache Flutter Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            build
+          key: ${{ runner.os }}-flutter-${{ matrix.flutter }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-flutter-${{ matrix.flutter }}
+
+      # 4. Install Dependencies
       - name: 📦 Install Dependencies
         run: flutter pub get
 
-      - name: 🧪 Skip Tests
-        run: echo "Skip tests"
+      # 5. Run Test
+      - name: 🧪 Run Tests
+        run: flutter test
 
+      # 6. Build APK (release)
       - name: 🏗️ Build APK
         run: flutter build apk --release
 
-      - name: 🔍 Check APK File
+      # 7. Debug File
+      - name: 🔍 Check APK
         run: ls -R build/app/outputs/flutter-apk/
 
-      - name: 📤 Upload APK Artifact
+      # 8. Upload Artifact
+      - name: 📤 Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-release
+          name: apk-${{ matrix.flutter }}
           path: build/app/outputs/flutter-apk/app-release.apk
 
-      - name: 🚀 Create Release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          name: "Release ${{ github.ref_name }}"
-          files: build/app/outputs/flutter-apk/app-release.apk
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 📢 Notify Telegram (Success)
-        if: success()
-        run: |
-          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
-          -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-          -d text="✅ Build APK berhasil | Commit: ${{ github.sha }}"
-
+      # 9. Send APK ke Telegram
       - name: 📤 Send APK to Telegram
         if: success()
         run: |
@@ -65,15 +68,16 @@ jobs:
             curl -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument \
               -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
               -F document=@$FILE \
-              -F caption="📦 APK terbaru 🚀 | Commit: ${{ github.sha }}"
+              -F caption="✅ APK berhasil di-build | Flutter ${{ matrix.flutter }}"
           else
-            echo "APK file not found!"
+            echo "APK tidak ditemukan!"
             exit 1
           fi
 
-      - name: ❌ Notify Telegram (Failed)
+      # 10. Notify Failed
+      - name: ❌ Notify Failed
         if: failure()
         run: |
           curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
           -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-          -d text="❌ Build gagal di GitHub Actions"
+          -d text="❌ Build gagal di Flutter ${{ matrix.flutter }}"
